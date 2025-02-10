@@ -1,0 +1,115 @@
+<!-- Signup HTML to receive user information, and send it to the back-end. -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+</head>
+<body>
+    <div class="container">
+        <h1>Sign Up</h1>
+        <div class="form-container">
+            <form id="form" th:action="@{/authenticate/signup}" method="POST">
+                <label for="name">Full Name:</label>
+                <input type="text" id="name" name="name" required>
+
+                <label for="username">Username:</label>
+                <input type="text" id="username" name="username" required>
+
+                <label for="email">Email Address:</label>
+                <input type="email" id="email" name="email" required>
+
+                <label for="phone">Phone Number:</label>
+                <input type="tel" id="phone" name="phone" required>
+
+                <label for="password">Password:</label>
+                <input type="password" id="password" name="password" required>
+
+                <label for="confirm-password">Confirm Password:</label>
+                <input type="password" id="confirm-password" name="confirm-password" required>
+
+                <input type="hidden" id="role" name="role" value="trader">
+
+                <label for="security-question">Security Question:</label>
+                <select id="security-question" name="security-question" required>
+                    <option value="pet">What was the name of your first pet?</option>
+                    <option value="school">What was the name of your elementary school?</option>
+                    <option value="city">In what city were you born?</option>
+                </select>
+
+                <label for="security-answer">Answer:</label>
+                <input type="text" id="security-answer" name="security-answer" required>
+
+                <button id="click" type="button" class="btn">Sign Up</button>
+            </form>
+            <p>Already have an account? <a th:href="@{/login}">Log in</a></p>
+        </div>
+    </div>
+</body>
+</html>
+<script>
+    //Listen to a click event on the button only.
+    const signupForm = document.getElementById("click");
+    signupForm.addEventListener('click', (event) => {
+        event.preventDefault();
+
+        //get all the inputs by name
+        const name = document.getElementById('name').value;
+        const username = document.getElementById('username').value;
+        const email = document.getElementById('email').value;
+        const phoneNumber = document.getElementById('phone').value;
+        const password = document.getElementById('password').value;
+        const confirmPassword = document.getElementById('confirm-password').value;
+        const role = document.getElementById('role').value;
+        const securityQuestion = document.getElementById('security-question').value;
+        const securityAnswer = document.getElementById('security-answer').value;
+        const permissions = "0"
+
+        //data received for the role table in database
+        const roleData = {
+            name: role,
+            permission: parseInt(permissions, 10)
+        }
+
+        //all formatted as json
+        const data = {
+            name,
+            username,
+            email,
+            phoneNumber,
+            password,
+            role: roleData,
+            securityQuestion,
+            securityAnswer
+        };
+
+        //if passwords are the same, convert data into json string
+        if(password === confirmPassword) {
+            const jsonData = JSON.stringify(data);
+
+            //post json to signup path
+            fetch('/signup', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: jsonData
+            })
+                //receive response code, and process
+                .then(response =>{
+                    //if response code is between 200-299
+                    if (response.ok) {
+                        console.log('Sign up successful');
+                        window.location.href ='/login';
+                    }
+                    //signup info processing fail
+                    else {
+                        console.error('Sign up failed');
+                        window.location.href = '/signup';
+                    }
+                })
+        }
+    })
+</script>
